@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unsought Comfort by Kaisha Gerhardt</title>
+    <title>Video Player</title>
     <style>
         body {
             margin: 0;
@@ -20,10 +20,9 @@
         }
 
         #flashWarning {
-            font-size: 13px;
-            font-family:'Courier New', Courier, monospace;
+            font-size: 14px;
             margin-bottom: 10px;
-            background-color: #cf484870;
+            background-color: #ff000042;
             padding: 5px 10px;
             border-radius: 5px;
         }
@@ -32,6 +31,12 @@
             width: 100%;
             height: auto;
             max-height: 80vh;
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .fade-out {
+            opacity: 0;
         }
 
         #controls {
@@ -39,19 +44,20 @@
             margin-top: 10px;
         }
 
-        #muteButton, #externalLinkButton {
-            background-color: rgba(85, 85, 85, 0.7);
+        #muteButton, #externalLinkButton, #fullscreenButton {
+            background-color: rgba(255, 255, 255, 0.295);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
             border: none;
             border-radius: 5px;
             padding: 10px 20px;
-            font-family:'Times New Roman', Times, serif;
             font-size: 16px;
             cursor: pointer;
             margin: 5px;
         }
 
         #externalLinkButton {
-            background-color: #273d55a6;
+            background-color: #007bff;
             color: #fff;
         }
     </style>
@@ -68,17 +74,52 @@
 
     <div id="controls">
         <button id="muteButton" onclick="toggleMute()">Unmute</button>
-   
+        <button id="fullscreenButton" onclick="toggleFullscreen()">Fullscreen</button>
     </div>
 
     <script>
         const video = document.getElementById('myVideo');
         const muteButton = document.getElementById('muteButton');
+        const fullscreenButton = document.getElementById('fullscreenButton');
 
         function toggleMute() {
             video.muted = !video.muted;
             muteButton.textContent = video.muted ? 'Unmute' : 'Mute';
         }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) { // Safari
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) { // IE/Edge
+                    video.msRequestFullscreen();
+                }
+                fullscreenButton.textContent = 'Exit Fullscreen';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { // Safari
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { // IE/Edge
+                    document.msExitFullscreen();
+                }
+                fullscreenButton.textContent = 'Fullscreen';
+            }
+        }
+
+        video.addEventListener('timeupdate', function() {
+            if (video.currentTime > video.duration - 1) { // Start fading 1 second before the video ends
+                video.classList.add('fade-out');
+            }
+        });
+
+        video.addEventListener('ended', function() {
+            video.classList.remove('fade-out');
+            video.currentTime = 0; // Reset the video time to the start
+            video.play(); // Play the video again to create the loop
+        });
     </script>
 </body>
 </html>
